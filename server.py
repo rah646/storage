@@ -231,408 +231,337 @@ def dashboard():
         html = f"""<!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>⚡ Token Server</title>
-    <!-- Font Awesome for Telegram icon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⚡ TOKEN SERVER · CHAOS EDITION</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
     <style>
         * {{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }}
-        
+
         body {{
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            padding: 20px;
-            /* GIF Background */
-            background: url('https://media.giphy.com/media/3o6Ztq6B5lFJ5tK1iU/giphy.gif') center/cover no-repeat fixed;
-            background-color: #0f172a;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 16px;
+            background: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzhsMm8yZDFndjVmYW14NWtxMXplOXk2eGRudjUwMmVha3VuYmd0NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/ZZYRRgchnlohKonlSV/giphy.gif') center/cover no-repeat fixed;
+            background-color: #0b0e14;
             position: relative;
         }}
-        
-        /* Dark overlay for readability */
+
         body::before {{
             content: '';
             position: fixed;
             inset: 0;
-            background: rgba(15, 23, 42, 0.70);
-            backdrop-filter: blur(3px);
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(6px) saturate(180%);
+            -webkit-backdrop-filter: blur(6px) saturate(180%);
             z-index: 0;
         }}
-        
-        /* Main Container - Glass Effect */
+
         .container {{
             display: flex;
-            background: rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 24px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            flex-wrap: wrap;
+            background: rgba(10, 14, 23, 0.65);
+            backdrop-filter: blur(24px) brightness(1.1);
+            -webkit-backdrop-filter: blur(24px) brightness(1.1);
+            border-radius: 40px;
+            border: 2px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 40px 80px rgba(0, 0, 0, 0.8), inset 0 0 80px rgba(255, 255, 255, 0.03);
             overflow: hidden;
-            max-width: 1100px;
+            max-width: 1200px;
             width: 100%;
             position: relative;
             z-index: 1;
         }}
-        
-        /* Left Side - Stats */
+
         .stats-side {{
             flex: 1.2;
-            padding: 48px 40px;
-            background: rgba(255, 255, 255, 0.03);
-            min-width: 0;
+            min-width: 280px;
+            padding: 40px 36px;
+            background: rgba(0, 0, 0, 0.25);
+            border-right: 1px solid rgba(255, 255, 255, 0.04);
         }}
-        
-        /* Right Side - Tokens */
+
         .tokens-side {{
             flex: 1;
-            padding: 48px 40px;
-            background: rgba(255, 255, 255, 0.02);
-            border-left: 1px solid rgba(255, 255, 255, 0.05);
-            min-width: 0;
+            min-width: 260px;
+            padding: 40px 36px;
+            background: rgba(0, 0, 0, 0.15);
         }}
-        
+
         .logo {{
-            font-size: 28px;
-            font-weight: 700;
-            color: white;
-            margin-bottom: 32px;
+            font-size: 30px;
+            font-weight: 800;
+            color: #fff;
+            margin-bottom: 28px;
             letter-spacing: 1px;
             display: flex;
-            align-items: center;
             flex-wrap: wrap;
-            gap: 8px;
+            align-items: center;
+            gap: 10px 16px;
+            text-shadow: 0 0 20px rgba(0, 150, 255, 0.3);
         }}
-        
-        .logo span {{
-            color: rgba(255, 255, 255, 0.3);
-        }}
-        
+
+        .logo span {{ color: rgba(255, 255, 255, 0.25); }}
         .logo .badge {{
-            font-size: 12px;
-            background: rgba(52, 211, 153, 0.2);
-            color: #34d399;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-weight: 400;
+            font-size: 11px;
+            background: rgba(255, 70, 70, 0.25);
+            color: #ff6b6b;
+            padding: 4px 14px;
+            border-radius: 40px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: 1px solid rgba(255, 70, 70, 0.2);
+            text-transform: uppercase;
         }}
-        
-        /* Telegram Owner Link */
+
         .owner-link {{
             margin-left: auto;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            color: rgba(255, 255, 255, 0.5);
+            gap: 8px;
+            color: #8ab4f8;
             text-decoration: none;
-            font-size: 13px;
-            font-weight: 500;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 6px 14px;
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+            background: rgba(0, 136, 204, 0.15);
+            padding: 6px 18px 6px 14px;
+            border-radius: 40px;
+            border: 1px solid rgba(0, 136, 204, 0.25);
+            transition: 0.25s ease;
+            text-shadow: 0 0 12px rgba(0, 150, 255, 0.2);
         }}
-        
+        .owner-link i {{ font-size: 18px; color: #26A5E4; }}
         .owner-link:hover {{
-            color: #26A5E4;
-            background: rgba(38, 165, 228, 0.15);
-            border-color: rgba(38, 165, 228, 0.3);
-            transform: translateY(-1px);
+            background: rgba(0, 136, 204, 0.3);
+            border-color: #26A5E4;
+            transform: scale(1.03);
+            box-shadow: 0 0 30px rgba(38, 165, 228, 0.2);
         }}
-        
-        .owner-link i {{
-            font-size: 16px;
-        }}
-        
-        /* Stats Grid */
+
         .stats-grid {{
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
-            margin-bottom: 24px;
+            margin-bottom: 28px;
         }}
-        
+
         .stat-card {{
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 12px;
-            padding: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 16px;
+            padding: 18px 14px;
+            border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: 0.2s;
+            backdrop-filter: blur(4px);
         }}
-        
         .stat-card:hover {{
             background: rgba(255, 255, 255, 0.08);
-            transform: translateY(-2px);
+            transform: translateY(-3px);
+            border-color: rgba(255, 255, 255, 0.08);
         }}
-        
+
         .stat-card .value {{
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 32px;
+            font-weight: 800;
             color: white;
-            line-height: 1.2;
+            line-height: 1.1;
+            letter-spacing: -0.5px;
         }}
-        
         .stat-card .label {{
-            font-size: 11px;
-            color: rgba(255, 255, 255, 0.4);
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.35);
             text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 4px;
+            letter-spacing: 1.5px;
+            margin-top: 6px;
+            font-weight: 600;
         }}
-        
-        .stat-card .value.green {{ color: #34d399; }}
-        .stat-card .value.blue {{ color: #60a5fa; }}
-        .stat-card .value.orange {{ color: #fbbf24; }}
-        .stat-card .value.pink {{ color: #f472b6; }}
-        .stat-card .value.purple {{ color: #a78bfa; }}
-        
-        /* Progress Bar */
+
+        .stat-card .value.green {{ color: #4ade80; text-shadow: 0 0 20px rgba(74, 222, 128, 0.3); }}
+        .stat-card .value.blue {{ color: #60a5fa; text-shadow: 0 0 20px rgba(96, 165, 250, 0.3); }}
+        .stat-card .value.orange {{ color: #fbbf24; text-shadow: 0 0 20px rgba(251, 191, 36, 0.3); }}
+        .stat-card .value.pink {{ color: #f472b6; text-shadow: 0 0 20px rgba(244, 114, 182, 0.3); }}
+
         .progress-section {{
             margin-bottom: 24px;
         }}
-        
         .progress-section .label-row {{
             display: flex;
             justify-content: space-between;
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.4);
+            color: rgba(255, 255, 255, 0.3);
             margin-bottom: 6px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
         }}
-        
         .progress-bar {{
-            height: 6px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.04);
+            border-radius: 20px;
             overflow: hidden;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }}
-        
         .progress-bar .fill {{
             height: 100%;
-            background: linear-gradient(90deg, #60a5fa, #a78bfa);
-            border-radius: 10px;
-            transition: width 0.5s ease;
+            background: linear-gradient(90deg, #a78bfa, #f472b6, #fb923c);
+            border-radius: 20px;
+            transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
             width: {bar_pct}%;
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
         }}
-        
-        /* Uptime & Rate */
+
         .info-row {{
             display: flex;
-            gap: 24px;
-            font-size: 13px;
-            color: rgba(255, 255, 255, 0.4);
             flex-wrap: wrap;
+            gap: 12px 28px;
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.3);
+            margin-bottom: 20px;
         }}
-        
         .info-row strong {{
             color: rgba(255, 255, 255, 0.7);
-            font-weight: 500;
+            font-weight: 600;
         }}
-        
-        /* Tokens List */
+
+        .api-endpoints {{
+            margin-top: 16px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }}
+        .api-endpoints h4 {{
+            color: rgba(255, 255, 255, 0.2);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 12px;
+        }}
+        .endpoint {{
+            display: inline-block;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', 'SF Mono', monospace;
+            color: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.02);
+            padding: 5px 14px;
+            border-radius: 30px;
+            margin: 0 4px 8px 0;
+            border: 1px solid rgba(255, 255, 255, 0.03);
+        }}
+        .endpoint .method {{
+            color: #60a5fa;
+            font-weight: 700;
+        }}
+
         .tokens-header {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 16px;
+            margin-bottom: 18px;
         }}
-        
         .tokens-header h3 {{
             color: white;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 17px;
+            font-weight: 700;
+            letter-spacing: -0.3px;
         }}
-        
         .tokens-header .count {{
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.05);
-            padding: 4px 12px;
-            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.25);
+            background: rgba(255, 255, 255, 0.03);
+            padding: 4px 16px;
+            border-radius: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.03);
         }}
-        
+
         .tokens-list {{
-            max-height: 400px;
+            max-height: 420px;
             overflow-y: auto;
+            padding-right: 4px;
         }}
-        
-        .tokens-list::-webkit-scrollbar {{
-            width: 4px;
-        }}
-        
-        .tokens-list::-webkit-scrollbar-track {{
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }}
-        
-        .tokens-list::-webkit-scrollbar-thumb {{
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-        }}
-        
+        .tokens-list::-webkit-scrollbar {{ width: 4px; }}
+        .tokens-list::-webkit-scrollbar-track {{ background: rgba(255,255,255,0.02); border-radius: 10px; }}
+        .tokens-list::-webkit-scrollbar-thumb {{ background: rgba(255,255,255,0.08); border-radius: 10px; }}
+
         .token-row {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.02);
             gap: 12px;
         }}
-        
-        .token-row:last-child {{
-            border-bottom: none;
-        }}
-        
+        .token-row:last-child {{ border-bottom: none; }}
+
         .token-text {{
             font-family: 'SF Mono', 'Courier New', monospace;
             font-size: 12px;
-            color: #34d399;
             word-break: break-all;
             flex: 1;
+            letter-spacing: -0.2px;
         }}
-        
         .token-meta {{
             display: flex;
             align-items: center;
             gap: 12px;
             flex-shrink: 0;
         }}
-        
         .token-age {{
             font-size: 11px;
-            color: rgba(255, 255, 255, 0.3);
+            color: rgba(255, 255, 255, 0.2);
             font-family: 'SF Mono', monospace;
         }}
-        
         .token-status {{
-            font-size: 10px;
-            font-weight: 600;
+            font-size: 9px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            letter-spacing: 0.8px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
         }}
-        
+
         .empty-state {{
             text-align: center;
-            color: rgba(255, 255, 255, 0.2);
-            padding: 40px 0;
-            font-size: 14px;
-        }}
-        
-        /* API Endpoints */
-        .api-endpoints {{
-            margin-top: 24px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }}
-        
-        .api-endpoints h4 {{
-            color: rgba(255, 255, 255, 0.3);
-            font-size: 11px;
-            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.1);
+            padding: 50px 0;
+            font-size: 15px;
             letter-spacing: 1px;
-            margin-bottom: 12px;
         }}
-        
-        .endpoint {{
-            display: inline-block;
-            font-size: 11px;
-            font-family: 'SF Mono', monospace;
-            color: rgba(255, 255, 255, 0.3);
-            background: rgba(255, 255, 255, 0.03);
-            padding: 4px 12px;
-            border-radius: 6px;
-            margin: 0 6px 6px 0;
-            border: 1px solid rgba(255, 255, 255, 0.03);
+
+        @media (max-width: 760px) {{
+            .container {{ flex-direction: column; border-radius: 28px; }}
+            .stats-side {{ border-right: none; border-bottom: 1px solid rgba(255,255,255,0.04); }}
+            .stats-side, .tokens-side {{ padding: 30px 24px; }}
+            .owner-link {{ margin-left: 0; }}
+            .logo {{ gap: 8px; }}
+            .stats-grid {{ grid-template-columns: 1fr 1fr; gap: 8px; }}
+            .stat-card .value {{ font-size: 26px; }}
         }}
-        
-        .endpoint .method {{
-            color: #60a5fa;
-            font-weight: 600;
-        }}
-        
-        /* Responsive */
-        @media (max-width: 768px) {{
-            .container {{
-                flex-direction: column;
-                max-width: 500px;
-            }}
-            
-            .tokens-side {{
-                border-left: none;
-                border-top: 1px solid rgba(255, 255, 255, 0.05);
-            }}
-            
-            .stats-side,
-            .tokens-side {{
-                padding: 32px 24px;
-            }}
-            
-            .stats-grid {{
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }}
-            
-            .stat-card .value {{
-                font-size: 22px;
-            }}
-            
-            .token-row {{
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 4px;
-            }}
-            
-            .token-meta {{
-                width: 100%;
-                justify-content: space-between;
-            }}
-            
-            .owner-link {{
-                margin-left: 0;
-                margin-top: 8px;
-            }}
-            
-            .logo {{
-                flex-wrap: wrap;
-            }}
-        }}
-        
-        @media (max-width: 480px) {{
-            .stats-grid {{
-                grid-template-columns: 1fr 1fr;
-            }}
-            
-            .stat-card {{
-                padding: 12px;
-            }}
-            
-            .stat-card .value {{
-                font-size: 18px;
-            }}
+
+        @media (max-width: 460px) {{
+            .stats-grid {{ grid-template-columns: 1fr 1fr; }}
+            .stat-card {{ padding: 12px; }}
+            .stat-card .value {{ font-size: 22px; }}
+            .token-row {{ flex-direction: column; align-items: flex-start; gap: 2px; }}
+            .token-meta {{ width: 100%; justify-content: space-between; }}
         }}
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Left Side - Stats -->
         <div class="stats-side">
             <div class="logo">
-                ⚡ Token<span>Server</span>
-                <span class="badge">v2.0</span>
-                <!-- Telegram Owner Link -->
-                <a href="https://t.me/KeemSGHLL" target="_blank" class="owner-link" title="Contact owner @KeemSGHLL">
-                    <i class="fab fa-telegram-plane"></i>
-                    @KeemSGHLL
+                ⚡ TOKEN<span>SERVER</span>
+                <span class="badge">v2.0 · CHAOS</span>
+                <a href="https://t.me/KeemSGHLL" target="_blank" class="owner-link">
+                    <i class="fab fa-telegram-plane"></i> @KeemSGHLL
                 </a>
             </div>
-            
+
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="value green">{q}</div>
@@ -651,25 +580,25 @@ def dashboard():
                     <div class="label">Expired</div>
                 </div>
             </div>
-            
+
             <div class="progress-section">
                 <div class="label-row">
-                    <span>Queue Capacity</span>
+                    <span>QUEUE CAPACITY</span>
                     <span>{q} / {peak}</span>
                 </div>
                 <div class="progress-bar">
-                    <div class="fill" style="width: {bar_pct}%"></div>
+                    <div class="fill" style="width: {bar_pct}%;"></div>
                 </div>
             </div>
-            
+
             <div class="info-row">
                 <span>⏱ <strong>{round(elapsed, 1)}s</strong> uptime</span>
                 <span>⚡ <strong>{rate:.1f}</strong> tokens/min</span>
                 <span>📦 <strong>{_stats["peak_queue"]}</strong> peak</span>
             </div>
-            
+
             <div class="api-endpoints">
-                <h4>API Endpoints</h4>
+                <h4>⚡ ENDPOINTS</h4>
                 <span class="endpoint"><span class="method">POST</span> /api/save-token</span>
                 <span class="endpoint"><span class="method">GET</span> /api/get-token</span>
                 <span class="endpoint"><span class="method">GET</span> /api/token/bulk?n=5</span>
@@ -677,11 +606,10 @@ def dashboard():
                 <span class="endpoint"><span class="method">DELETE</span> /api/tokens</span>
             </div>
         </div>
-        
-        <!-- Right Side - Tokens -->
+
         <div class="tokens-side">
             <div class="tokens-header">
-                <h3>📋 Recent Tokens</h3>
+                <h3>📋 RECENT TOKENS</h3>
                 <span class="count">{q} in queue</span>
             </div>
             <div class="tokens-list">
