@@ -191,7 +191,7 @@ def token_count():
 
 @app.route("/", methods=["GET"])
 def dashboard():
-    """Modern full-width dashboard with shattered layout"""
+    """Premium animated dashboard with stunning design"""
     with _lock:
         _purge_expired()
         elapsed = time.time() - _stats["start_time"]
@@ -200,24 +200,28 @@ def dashboard():
         peak = _stats["peak_queue"] or 1
         bar_pct = min(int(q / peak * 100), 100) if peak else 0
 
-        # Build token list
+        # Build token list with staggered animation
         token_html = ""
-        for item in list(_token_queue)[-20:]:
+        for idx, item in enumerate(list(_token_queue)[-20:]):
             age = round(time.time() - item["ts"], 1)
             if age < 60:
                 color = "#10b981"
                 status = "fresh"
+                glow = "0 0 20px rgba(16, 185, 129, 0.15)"
             elif age < 120:
                 color = "#f59e0b"
                 status = "aging"
+                glow = "0 0 20px rgba(245, 158, 11, 0.15)"
             else:
                 color = "#ef4444"
                 status = "expiring"
+                glow = "0 0 20px rgba(239, 68, 68, 0.15)"
             
             token_preview = item["token"][:50] + "..." if len(item["token"]) > 50 else item["token"]
+            delay = idx * 0.05
             token_html += f'''
-            <div class="token-entry">
-                <span class="token-value" style="color:{color}">{token_preview}</span>
+            <div class="token-entry" style="animation-delay: {delay}s;">
+                <span class="token-value" style="color:{color}; text-shadow:{glow}">{token_preview}</span>
                 <div class="token-meta">
                     <span class="token-age">{age}s</span>
                     <span class="token-badge" style="background:{color}22; color:{color}">{status}</span>
@@ -226,7 +230,13 @@ def dashboard():
             '''
 
         if not token_html:
-            token_html = '<div class="empty-state">No tokens in queue</div>'
+            token_html = '''
+            <div class="empty-state">
+                <div class="empty-icon">◆</div>
+                <p>No tokens in queue</p>
+                <span>Waiting for incoming tokens...</span>
+            </div>
+            '''
 
         html = f"""<!DOCTYPE html>
 <html lang="en">
@@ -236,34 +246,81 @@ def dashboard():
     <title>Token Server · v2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        /* ===== RESET & BASE ===== */
         * {{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }}
 
+        :root {{
+            --bg-primary: #07070b;
+            --bg-secondary: #0c0c14;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #475569;
+            --border-color: rgba(255, 255, 255, 0.06);
+            --glass-bg: rgba(255, 255, 255, 0.03);
+            --glow-blue: rgba(59, 130, 246, 0.15);
+            --glow-purple: rgba(139, 92, 246, 0.15);
+        }}
+
         body {{
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            background: #0a0a0f;
-            color: #e2e8f0;
+            background: var(--bg-primary);
+            color: var(--text-primary);
             min-height: 100vh;
             background-image: url('https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzhsMm8yZDFndjVmYW14NWtxMXplOXk2eGRudjUwMmVha3VuYmd0NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/ZZYRRgchnlohKonlSV/giphy.gif');
             background-size: cover;
             background-position: center;
             background-attachment: fixed;
             position: relative;
+            overflow-x: hidden;
         }}
 
+        /* Animated gradient overlay */
         body::before {{
             content: '';
             position: fixed;
             inset: 0;
-            background: rgba(10, 10, 15, 0.82);
-            backdrop-filter: blur(8px);
+            background: 
+                radial-gradient(ellipse at 20% 50%, rgba(59, 130, 246, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 50%, rgba(139, 92, 246, 0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 50% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
+            backdrop-filter: blur(12px);
             z-index: 0;
+            animation: gradientShift 15s ease-in-out infinite;
         }}
 
-        /* ===== LAYOUT GRID ===== */
+        @keyframes gradientShift {{
+            0%, 100% {{ opacity: 0.8; }}
+            50% {{ opacity: 1; }}
+        }}
+
+        /* Animated floating particles */
+        body::after {{
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.05), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.03), transparent),
+                radial-gradient(2px 2px at 50px 160px, rgba(255,255,255,0.04), transparent),
+                radial-gradient(2px 2px at 90px 40px, rgba(255,255,255,0.05), transparent),
+                radial-gradient(2px 2px at 130px 80px, rgba(255,255,255,0.03), transparent),
+                radial-gradient(2px 2px at 160px 30px, rgba(255,255,255,0.04), transparent);
+            background-size: 200px 200px;
+            z-index: 0;
+            animation: particleFloat 60s linear infinite;
+            opacity: 0.5;
+        }}
+
+        @keyframes particleFloat {{
+            0% {{ transform: translateY(0) rotate(0deg); }}
+            100% {{ transform: translateY(-200px) rotate(360deg); }}
+        }}
+
+        /* ===== APP CONTAINER ===== */
         .app {{
             position: relative;
             z-index: 1;
@@ -272,9 +329,15 @@ def dashboard():
             padding: 24px 32px;
             min-height: 100vh;
             display: grid;
-            grid-template-columns: 380px 1fr;
+            grid-template-columns: 360px 1fr;
             grid-template-rows: auto 1fr;
             gap: 24px;
+            animation: fadeIn 0.8s ease-out;
+        }}
+
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(20px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
         }}
 
         /* ===== HEADER ===== */
@@ -283,11 +346,35 @@ def dashboard():
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 28px;
-            background: rgba(255, 255, 255, 0.04);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            backdrop-filter: blur(12px);
+            padding: 18px 28px;
+            background: var(--glass-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            animation: slideDown 0.6s ease-out;
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .header::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.3), rgba(139, 92, 246, 0.3), transparent);
+            animation: shimmer 3s infinite;
+        }}
+
+        @keyframes shimmer {{
+            0% {{ transform: translateX(-100%); }}
+            100% {{ transform: translateX(100%); }}
+        }}
+
+        @keyframes slideDown {{
+            from {{ opacity: 0; transform: translateY(-30px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
         }}
 
         .brand {{
@@ -297,32 +384,39 @@ def dashboard():
         }}
 
         .brand-icon {{
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border-radius: 10px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
             font-size: 18px;
             color: white;
+            position: relative;
+            animation: pulseGlow 2s ease-in-out infinite;
+        }}
+
+        @keyframes pulseGlow {{
+            0%, 100% {{ box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }}
+            50% {{ box-shadow: 0 0 40px rgba(99, 102, 241, 0.4); }}
         }}
 
         .brand h1 {{
             font-size: 22px;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #f0f0f0, #94a3b8);
+            background: linear-gradient(135deg, #f1f5f9, #94a3b8);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }}
 
         .brand small {{
-            font-size: 13px;
-            color: #64748b;
+            font-size: 12px;
+            color: var(--text-muted);
             font-weight: 400;
-            -webkit-text-fill-color: #64748b;
+            -webkit-text-fill-color: var(--text-muted);
             background: none;
             margin-left: 6px;
         }}
@@ -333,67 +427,125 @@ def dashboard():
             gap: 16px;
         }}
 
+        .status-indicator {{
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            padding: 6px 16px;
+            border-radius: 20px;
+            background: rgba(16, 185, 129, 0.08);
+            border: 1px solid rgba(16, 185, 129, 0.15);
+        }}
+
+        .status-dot {{
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: statusPulse 2s ease-in-out infinite;
+        }}
+
+        @keyframes statusPulse {{
+            0%, 100% {{ opacity: 1; transform: scale(1); }}
+            50% {{ opacity: 0.3; transform: scale(0.8); }}
+        }}
+
         .telegram-link {{
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            color: #94a3b8;
+            color: var(--text-secondary);
             text-decoration: none;
             font-size: 14px;
-            padding: 8px 18px;
-            border-radius: 10px;
+            padding: 8px 20px;
+            border-radius: 12px;
             background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 255, 255, 0.06);
-            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .telegram-link::before {{
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }}
+
+        .telegram-link:hover::before {{
+            opacity: 1;
+        }}
+
+        .telegram-link:hover {{
+            transform: translateY(-2px) scale(1.02);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: var(--text-primary);
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15);
         }}
 
         .telegram-link i {{
             color: #3b82f6;
             font-size: 16px;
+            position: relative;
+            z-index: 1;
         }}
 
-        .telegram-link:hover {{
-            background: rgba(59, 130, 246, 0.12);
-            border-color: rgba(59, 130, 246, 0.25);
-            color: #e2e8f0;
+        .telegram-link span {{
+            position: relative;
+            z-index: 1;
         }}
 
-        .status-dot {{
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #10b981;
-            margin-right: 6px;
-            animation: pulse 2s infinite;
-        }}
-
-        @keyframes pulse {{
-            0%, 100% {{ opacity: 1; }}
-            50% {{ opacity: 0.3; }}
-        }}
-
-        /* ===== LEFT PANEL ===== */
+        /* ===== SIDEBAR ===== */
         .sidebar {{
             display: flex;
             flex-direction: column;
             gap: 20px;
+            animation: slideRight 0.7s ease-out;
+        }}
+
+        @keyframes slideRight {{
+            from {{ opacity: 0; transform: translateX(-30px); }}
+            to {{ opacity: 1; transform: translateX(0); }}
         }}
 
         .panel {{
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: var(--glass-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
             padding: 24px;
-            backdrop-filter: blur(12px);
+            backdrop-filter: blur(20px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .panel::after {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+        }}
+
+        .panel:hover {{
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.3);
         }}
 
         .panel-title {{
-            font-size: 11px;
+            font-size: 10px;
             text-transform: uppercase;
-            letter-spacing: 1.2px;
-            color: #64748b;
+            letter-spacing: 1.5px;
+            color: var(--text-muted);
             font-weight: 600;
             margin-bottom: 18px;
         }}
@@ -402,14 +554,38 @@ def dashboard():
         .stats-grid {{
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            gap: 10px;
         }}
 
         .stat-item {{
             padding: 16px;
             background: rgba(255, 255, 255, 0.03);
-            border-radius: 12px;
+            border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.04);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .stat-item::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.02), transparent);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }}
+
+        .stat-item:hover::before {{
+            opacity: 1;
+        }}
+
+        .stat-item:hover {{
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.08);
         }}
 
         .stat-number {{
@@ -417,20 +593,29 @@ def dashboard():
             font-weight: 700;
             letter-spacing: -0.5px;
             line-height: 1.2;
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s ease;
         }}
 
-        .stat-number.green {{ color: #10b981; }}
-        .stat-number.blue {{ color: #3b82f6; }}
-        .stat-number.amber {{ color: #f59e0b; }}
-        .stat-number.rose {{ color: #f43f5e; }}
+        .stat-item:hover .stat-number {{
+            transform: scale(1.05);
+        }}
+
+        .stat-number.green {{ color: #10b981; text-shadow: 0 0 30px rgba(16, 185, 129, 0.15); }}
+        .stat-number.blue {{ color: #3b82f6; text-shadow: 0 0 30px rgba(59, 130, 246, 0.15); }}
+        .stat-number.amber {{ color: #f59e0b; text-shadow: 0 0 30px rgba(245, 158, 11, 0.15); }}
+        .stat-number.rose {{ color: #f43f5e; text-shadow: 0 0 30px rgba(244, 63, 94, 0.15); }}
 
         .stat-label {{
-            font-size: 11px;
-            color: #64748b;
+            font-size: 10px;
+            color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.8px;
             margin-top: 4px;
             font-weight: 500;
+            position: relative;
+            z-index: 1;
         }}
 
         /* Progress */
@@ -442,23 +627,41 @@ def dashboard():
             display: flex;
             justify-content: space-between;
             font-size: 12px;
-            color: #64748b;
-            margin-bottom: 6px;
+            color: var(--text-muted);
+            margin-bottom: 8px;
         }}
 
         .progress-track {{
             height: 6px;
             background: rgba(255, 255, 255, 0.06);
-            border-radius: 8px;
+            border-radius: 10px;
             overflow: hidden;
+            position: relative;
         }}
 
         .progress-fill {{
             height: 100%;
             background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7);
-            border-radius: 8px;
+            border-radius: 10px;
             width: {bar_pct}%;
-            transition: width 0.6s ease;
+            transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+        }}
+
+        .progress-fill::after {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: progressShimmer 2s infinite;
+        }}
+
+        @keyframes progressShimmer {{
+            0% {{ transform: translateX(-100%); }}
+            100% {{ transform: translateX(100%); }}
         }}
 
         .metrics {{
@@ -466,12 +669,14 @@ def dashboard():
             flex-wrap: wrap;
             gap: 16px 28px;
             font-size: 13px;
-            color: #94a3b8;
-            margin-top: 4px;
+            color: var(--text-secondary);
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border-color);
         }}
 
         .metrics strong {{
-            color: #e2e8f0;
+            color: var(--text-primary);
             font-weight: 500;
         }}
 
@@ -484,12 +689,20 @@ def dashboard():
 
         .api-tag {{
             font-family: 'SF Mono', 'Fira Code', monospace;
-            font-size: 11px;
+            font-size: 10px;
             background: rgba(255, 255, 255, 0.04);
-            padding: 4px 14px;
-            border-radius: 6px;
+            padding: 5px 14px;
+            border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.04);
-            color: #94a3b8;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            cursor: default;
+        }}
+
+        .api-tag:hover {{
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-1px);
+            border-color: rgba(255, 255, 255, 0.08);
         }}
 
         .api-tag .method {{
@@ -497,47 +710,87 @@ def dashboard():
             font-weight: 600;
         }}
 
-        /* ===== RIGHT PANEL ===== */
+        /* ===== MAIN CONTENT ===== */
         .main {{
             display: flex;
             flex-direction: column;
             gap: 20px;
+            animation: slideLeft 0.7s ease-out;
+        }}
+
+        @keyframes slideLeft {{
+            from {{ opacity: 0; transform: translateX(30px); }}
+            to {{ opacity: 1; transform: translateX(0); }}
         }}
 
         .tokens-panel {{
             flex: 1;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 16px;
-            border: 1px solid rgba(255, 255, 255, 0.06);
+            background: var(--glass-bg);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
             padding: 24px;
-            backdrop-filter: blur(12px);
-            min-height: 400px;
+            backdrop-filter: blur(20px);
+            min-height: 450px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .tokens-panel::after {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2), transparent);
+        }}
+
+        .tokens-panel:hover {{
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.2);
         }}
 
         .tokens-header {{
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }}
 
         .tokens-header h2 {{
             font-size: 16px;
             font-weight: 600;
-            color: #e2e8f0;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+
+        .tokens-header h2::before {{
+            content: '';
+            width: 3px;
+            height: 16px;
+            background: linear-gradient(180deg, #6366f1, #8b5cf6);
+            border-radius: 4px;
         }}
 
         .tokens-count {{
             font-size: 12px;
-            color: #64748b;
+            color: var(--text-muted);
             background: rgba(255, 255, 255, 0.04);
             padding: 4px 16px;
             border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }}
+
+        .tokens-count:hover {{
+            background: rgba(255, 255, 255, 0.06);
         }}
 
         .tokens-scroll {{
-            max-height: 500px;
+            max-height: 520px;
             overflow-y: auto;
             padding-right: 4px;
         }}
@@ -547,11 +800,15 @@ def dashboard():
         }}
         .tokens-scroll::-webkit-scrollbar-track {{
             background: rgba(255, 255, 255, 0.02);
-            border-radius: 8px;
+            border-radius: 10px;
         }}
         .tokens-scroll::-webkit-scrollbar-thumb {{
             background: rgba(255, 255, 255, 0.08);
-            border-radius: 8px;
+            border-radius: 10px;
+            transition: background 0.3s ease;
+        }}
+        .tokens-scroll::-webkit-scrollbar-thumb:hover {{
+            background: rgba(255, 255, 255, 0.12);
         }}
 
         .token-entry {{
@@ -561,6 +818,20 @@ def dashboard():
             padding: 12px 0;
             border-bottom: 1px solid rgba(255, 255, 255, 0.03);
             gap: 16px;
+            animation: tokenFade 0.5s ease-out both;
+            transition: all 0.3s ease;
+        }}
+
+        .token-entry:hover {{
+            background: rgba(255, 255, 255, 0.02);
+            margin: 0 -8px;
+            padding: 12px 8px;
+            border-radius: 8px;
+        }}
+
+        @keyframes tokenFade {{
+            from {{ opacity: 0; transform: translateX(-10px); }}
+            to {{ opacity: 1; transform: translateX(0); }}
         }}
 
         .token-entry:last-child {{
@@ -574,6 +845,7 @@ def dashboard():
             word-break: break-all;
             flex: 1;
             letter-spacing: -0.2px;
+            transition: all 0.3s ease;
         }}
 
         .token-meta {{
@@ -585,7 +857,7 @@ def dashboard():
 
         .token-age {{
             font-size: 12px;
-            color: #64748b;
+            color: var(--text-muted);
             font-family: 'SF Mono', monospace;
             min-width: 40px;
             text-align: right;
@@ -598,16 +870,39 @@ def dashboard():
             letter-spacing: 0.6px;
             padding: 3px 12px;
             border-radius: 12px;
-            background: rgba(16, 185, 129, 0.15);
-            color: #10b981;
+            transition: all 0.3s ease;
         }}
 
         .empty-state {{
             text-align: center;
-            color: #475569;
             padding: 60px 0;
-            font-size: 14px;
-            letter-spacing: 0.5px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }}
+
+        .empty-icon {{
+            font-size: 32px;
+            color: var(--text-muted);
+            opacity: 0.3;
+            animation: emptyPulse 3s ease-in-out infinite;
+        }}
+
+        @keyframes emptyPulse {{
+            0%, 100% {{ opacity: 0.3; transform: scale(1); }}
+            50% {{ opacity: 0.6; transform: scale(1.05); }}
+        }}
+
+        .empty-state p {{
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 500;
+        }}
+
+        .empty-state span {{
+            color: var(--text-muted);
+            font-size: 13px;
         }}
 
         /* ===== RESPONSIVE ===== */
@@ -623,7 +918,7 @@ def dashboard():
             }}
         }}
 
-        @media (max-width: 640px) {{
+        @media (max-width: 768px) {{
             .app {{
                 padding: 12px;
                 gap: 16px;
@@ -631,12 +926,11 @@ def dashboard():
             .header {{
                 flex-direction: column;
                 gap: 12px;
-                align-items: flex-start;
+                align-items: stretch;
                 padding: 16px 20px;
             }}
             .header-actions {{
-                width: 100%;
-                justify-content: flex-start;
+                flex-wrap: wrap;
             }}
             .sidebar {{
                 grid-template-columns: 1fr;
@@ -645,7 +939,7 @@ def dashboard():
                 grid-template-columns: 1fr 1fr;
             }}
             .stat-number {{
-                font-size: 22px;
+                font-size: 24px;
             }}
             .token-entry {{
                 flex-direction: column;
@@ -655,6 +949,25 @@ def dashboard():
             .token-meta {{
                 width: 100%;
                 justify-content: space-between;
+            }}
+        }}
+
+        @media (max-width: 480px) {{
+            .stats-grid {{
+                grid-template-columns: 1fr 1fr;
+            }}
+            .stat-item {{
+                padding: 12px;
+            }}
+            .stat-number {{
+                font-size: 20px;
+            }}
+            .brand h1 {{
+                font-size: 18px;
+            }}
+            .telegram-link {{
+                font-size: 12px;
+                padding: 6px 14px;
             }}
         }}
     </style>
@@ -668,11 +981,13 @@ def dashboard():
                 <h1>Token Server <small>v2.0</small></h1>
             </div>
             <div class="header-actions">
-                <span style="display:flex;align-items:center;font-size:13px;color:#64748b;">
-                    <span class="status-dot"></span> operational
-                </span>
+                <div class="status-indicator">
+                    <span class="status-dot"></span>
+                    operational
+                </div>
                 <a href="https://t.me/KeemSGHLL" target="_blank" class="telegram-link">
-                    <i class="fab fa-telegram-plane"></i> @KeemSGHLL
+                    <i class="fab fa-telegram-plane"></i>
+                    <span>@KeemSGHLL</span>
                 </a>
             </div>
         </header>
@@ -696,96 +1011,4 @@ def dashboard():
                     </div>
                     <div class="stat-item">
                         <div class="stat-number rose">{_stats["expired"]}</div>
-                        <div class="stat-label">Expired</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-title">Capacity</div>
-                <div class="progress-wrap">
-                    <div class="progress-header">
-                        <span>{q} of {peak} tokens</span>
-                        <span>{bar_pct}%</span>
-                    </div>
-                    <div class="progress-track">
-                        <div class="progress-fill"></div>
-                    </div>
-                </div>
-                <div class="metrics" style="margin-top:16px;">
-                    <span>Uptime <strong>{round(elapsed, 1)}s</strong></span>
-                    <span>Rate <strong>{rate:.1f}/min</strong></span>
-                    <span>Peak <strong>{_stats["peak_queue"]}</strong></span>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-title">Endpoints</div>
-                <div class="api-list">
-                    <span class="api-tag"><span class="method">POST</span> /api/save-token</span>
-                    <span class="api-tag"><span class="method">GET</span> /api/get-token</span>
-                    <span class="api-tag"><span class="method">GET</span> /api/token/bulk</span>
-                    <span class="api-tag"><span class="method">GET</span> /api/status</span>
-                    <span class="api-tag"><span class="method">DELETE</span> /api/tokens</span>
-                </div>
-            </div>
-        </aside>
-
-        <!-- MAIN CONTENT -->
-        <main class="main">
-            <div class="tokens-panel">
-                <div class="tokens-header">
-                    <h2>Recent Tokens</h2>
-                    <span class="tokens-count">{q} in queue</span>
-                </div>
-                <div class="tokens-scroll">
-                    {token_html}
-                </div>
-            </div>
-        </main>
-    </div>
-</body>
-</html>"""
-
-        return html, 200, {"Content-Type": "text/html"}
-
-
-@app.route("/health", methods=["GET"])
-def health():
-    """Health check"""
-    return jsonify({
-        "ok": True,
-        "uptime": round(time.time() - _stats["start_time"], 1),
-        "queue_size": len(_token_queue),
-        "total_received": _stats["received"],
-    })
-
-
-# ============================================================
-#  MAIN
-# ============================================================
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Token Server v2")
-    parser.add_argument("--host", default="0.0.0.0", help="Bind address")
-    parser.add_argument("--port", type=int, default=5050, help="Port (default 5050)")
-    parser.add_argument("--ttl", type=int, default=180, help="Token TTL in seconds")
-    args = parser.parse_args()
-
-    TOKEN_TTL = args.ttl
-
-    print(f"""
-[ Token Server v2.0 ]
-  Mode   : RAM Only (NO STORAGE)
-  Port   : {args.port}
-  TTL    : {args.ttl}s
-  URL    : http://{args.host}:{args.port}
-
-  POST   /api/save-token
-  GET    /api/get-token
-  GET    /api/token/bulk?n=5
-  GET    /api/status
-  DELETE /api/tokens
-  GET    / (Dashboard)
-""")
-
-    app.run(host=args.host, port=args.port, debug=False, threaded=True)
+                        <
