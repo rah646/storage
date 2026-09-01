@@ -1011,4 +1011,96 @@ def dashboard():
                     </div>
                     <div class="stat-item">
                         <div class="stat-number rose">{_stats["expired"]}</div>
-                        <
+                        <div class="stat-label">Expired</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Capacity</div>
+                <div class="progress-wrap">
+                    <div class="progress-header">
+                        <span>{q} of {peak} tokens</span>
+                        <span>{bar_pct}%</span>
+                    </div>
+                    <div class="progress-track">
+                        <div class="progress-fill"></div>
+                    </div>
+                </div>
+                <div class="metrics">
+                    <span>Uptime <strong>{round(elapsed, 1)}s</strong></span>
+                    <span>Rate <strong>{rate:.1f}/min</strong></span>
+                    <span>Peak <strong>{_stats["peak_queue"]}</strong></span>
+                </div>
+            </div>
+
+            <div class="panel">
+                <div class="panel-title">Endpoints</div>
+                <div class="api-list">
+                    <span class="api-tag"><span class="method">POST</span> /api/save-token</span>
+                    <span class="api-tag"><span class="method">GET</span> /api/get-token</span>
+                    <span class="api-tag"><span class="method">GET</span> /api/token/bulk</span>
+                    <span class="api-tag"><span class="method">GET</span> /api/status</span>
+                    <span class="api-tag"><span class="method">DELETE</span> /api/tokens</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main">
+            <div class="tokens-panel">
+                <div class="tokens-header">
+                    <h2>Recent Tokens</h2>
+                    <span class="tokens-count">{q} in queue</span>
+                </div>
+                <div class="tokens-scroll">
+                    {token_html}
+                </div>
+            </div>
+        </main>
+    </div>
+</body>
+</html>"""
+
+        return html, 200, {"Content-Type": "text/html"}
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    """Health check"""
+    return jsonify({
+        "ok": True,
+        "uptime": round(time.time() - _stats["start_time"], 1),
+        "queue_size": len(_token_queue),
+        "total_received": _stats["received"],
+    })
+
+
+# ============================================================
+#  MAIN
+# ============================================================
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="Token Server v2")
+    parser.add_argument("--host", default="0.0.0.0", help="Bind address")
+    parser.add_argument("--port", type=int, default=5050, help="Port (default 5050)")
+    parser.add_argument("--ttl", type=int, default=180, help="Token TTL in seconds")
+    args = parser.parse_args()
+
+    TOKEN_TTL = args.ttl
+
+    print(f"""
+[ Token Server v2.0 ]
+  Mode   : RAM Only (NO STORAGE)
+  Port   : {args.port}
+  TTL    : {args.ttl}s
+  URL    : http://{args.host}:{args.port}
+
+  POST   /api/save-token
+  GET    /api/get-token
+  GET    /api/token/bulk?n=5
+  GET    /api/status
+  DELETE /api/tokens
+  GET    / (Dashboard)
+""")
+
+    app.run(host=args.host, port=args.port, debug=False, threaded=True)
