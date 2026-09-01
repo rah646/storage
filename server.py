@@ -191,7 +191,7 @@ def token_count():
 
 @app.route("/", methods=["GET"])
 def dashboard():
-    """Premium glass-morphism dashboard"""
+    """Premium glass-morphism dashboard with GIF background and Telegram link"""
     with _lock:
         _purge_expired()
         elapsed = time.time() - _stats["start_time"]
@@ -234,6 +234,8 @@ def dashboard():
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>⚡ Token Server</title>
+    <!-- Font Awesome for Telegram icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         * {{
             margin: 0;
@@ -247,14 +249,27 @@ def dashboard():
             justify-content: center;
             align-items: center;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
             padding: 20px;
+            /* GIF Background */
+            background: url('https://media.giphy.com/media/3o6Ztq6B5lFJ5tK1iU/giphy.gif') center/cover no-repeat fixed;
+            background-color: #0f172a;
+            position: relative;
+        }}
+        
+        /* Dark overlay for readability */
+        body::before {{
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.70);
+            backdrop-filter: blur(3px);
+            z-index: 0;
         }}
         
         /* Main Container - Glass Effect */
         .container {{
             display: flex;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.06);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: 24px;
@@ -263,6 +278,8 @@ def dashboard():
             overflow: hidden;
             max-width: 1100px;
             width: 100%;
+            position: relative;
+            z-index: 1;
         }}
         
         /* Left Side - Stats */
@@ -288,6 +305,10 @@ def dashboard():
             color: white;
             margin-bottom: 32px;
             letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
         }}
         
         .logo span {{
@@ -300,8 +321,35 @@ def dashboard():
             color: #34d399;
             padding: 2px 12px;
             border-radius: 20px;
-            margin-left: 12px;
             font-weight: 400;
+        }}
+        
+        /* Telegram Owner Link */
+        .owner-link {{
+            margin-left: auto;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: rgba(255, 255, 255, 0.5);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 6px 14px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }}
+        
+        .owner-link:hover {{
+            color: #26A5E4;
+            background: rgba(38, 165, 228, 0.15);
+            border-color: rgba(38, 165, 228, 0.3);
+            transform: translateY(-1px);
+        }}
+        
+        .owner-link i {{
+            font-size: 16px;
         }}
         
         /* Stats Grid */
@@ -380,6 +428,7 @@ def dashboard():
             gap: 24px;
             font-size: 13px;
             color: rgba(255, 255, 255, 0.4);
+            flex-wrap: wrap;
         }}
         
         .info-row strong {{
@@ -544,6 +593,15 @@ def dashboard():
                 width: 100%;
                 justify-content: space-between;
             }}
+            
+            .owner-link {{
+                margin-left: 0;
+                margin-top: 8px;
+            }}
+            
+            .logo {{
+                flex-wrap: wrap;
+            }}
         }}
         
         @media (max-width: 480px) {{
@@ -568,6 +626,11 @@ def dashboard():
             <div class="logo">
                 ⚡ Token<span>Server</span>
                 <span class="badge">v2.0</span>
+                <!-- Telegram Owner Link -->
+                <a href="https://t.me/KeemSGHLL" target="_blank" class="owner-link" title="Contact owner @KeemSGHLL">
+                    <i class="fab fa-telegram-plane"></i>
+                    @KeemSGHLL
+                </a>
             </div>
             
             <div class="stats-grid">
