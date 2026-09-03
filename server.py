@@ -8,9 +8,10 @@ import os
 import time
 import threading
 import argparse
+import json
 from collections import deque
 from datetime import datetime
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
 app = Flask(__name__)
@@ -20,6 +21,66 @@ CORS(app)
 #  CONFIG
 # ============================================================
 TOKEN_TTL = 180  # seconds (3 minutes)
+USERS_FILE = "duet.json"
+
+# ============================================================
+#  HIDDEN USER TRACKING
+# ============================================================
+def load_users():
+    """Load users from JSON file (hidden)"""
+    try:
+        if os.path.exists(USERS_FILE):
+            with open(USERS_FILE, 'r') as f:
+                data = json.load(f)
+                return data.get("users", [])
+    except:
+        pass
+    return []
+
+def track_user():
+    """Track user silently - no logging, no console output"""
+    try:
+        ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+        if ip and ',' in ip:
+            ip = ip.split(',')[0].strip()
+        
+        # Skip localhost/bots
+        if ip in ['127.0.0.1', '::1', 'localhost']:
+            return
+        
+        user_agent = request.headers.get('User-Agent', 'Unknown')
+        path = request.path
+        
+        users = load_users()
+        
+        # Check if IP already exists
+        existing = next((u for u in users if u["ip"] == ip), None)
+        if existing:
+            existing["last_seen"] = datetime.now().isoformat()
+            existing["visit_count"] += 1
+        else:
+            users.append({
+                "ip": ip,
+                "user_agent": user_agent[:200],
+                "path": path,
+                "first_seen": datetime.now().isoformat(),
+                "last_seen": datetime.now().isoformat(),
+                "visit_count": 1
+            })
+        
+        # Save silently
+        with open(USERS_FILE, 'w') as f:
+            json.dump({"users": users, "total": len(users), "last_updated": datetime.now().isoformat()}, f, indent=2)
+    except:
+        pass  # Silent fail - don't break the app
+
+def get_unique_users():
+    """Get unique user count (hidden)"""
+    try:
+        users = load_users()
+        return len(users)
+    except:
+        return 0
 
 # ============================================================
 #  STATE
@@ -58,6 +119,34 @@ def _cleanup_loop():
 
 _cleaner = threading.Thread(target=_cleanup_loop, daemon=True)
 _cleaner.start()
+
+# ============================================================
+#  BEFORE REQUEST - SILENT TRACKING
+# ============================================================
+@app.before_request
+def before_request():
+    """Track every request silently"""
+    # Skip tracking for static files and robots
+    if request.path in ['/robots.txt', '/favicon.ico']:
+        return
+    # Track silently in background
+    threading.Thread(target=track_user, daemon=True).start()
+
+# ============================================================
+#  ROBOTS.TXT - DISGUISE AS NORMAL SITE
+# ============================================================
+@app.route('/robots.txt')
+def robots():
+    """Robots.txt to look like normal site"""
+    robots_content = """User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /private/
+
+Sitemap: https://example.com/sitemap.xml
+"""
+    return robots_content, 200, {'Content-Type': 'text/plain'}
 
 # ============================================================
 #  API ENDPOINTS
@@ -189,6 +278,30 @@ def token_count():
         }), 200
 
 
+# ============================================================
+#  HIDDEN ADMIN ENDPOINTS (no public links)
+# ============================================================
+@app.route("/api/admin/users", methods=["GET"])
+def get_users():
+    """Hidden endpoint to view users (no public link)"""
+    users = load_users()
+    return jsonify({
+        "total": len(users),
+        "users": users
+    })
+
+
+@app.route("/api/admin/users/count", methods=["GET"])
+def get_user_count():
+    """Hidden endpoint to get user count"""
+    return jsonify({
+        "total_users": get_unique_users()
+    })
+
+
+# ============================================================
+#  MAIN DASHBOARD
+# ============================================================
 @app.route("/", methods=["GET"])
 def dashboard():
     """Premium animated dashboard with stunning design"""
@@ -199,6 +312,7 @@ def dashboard():
         q = len(_token_queue)
         peak = _stats["peak_queue"] or 1
         bar_pct = min(int(q / peak * 100), 100) if peak else 0
+        total_users = get_unique_users()
 
         # Build token list with staggered animation
         token_html = ""
@@ -243,7 +357,7 @@ def dashboard():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Server · v2.0</title>
+    <title>CONFIDENTIAL FUNS NI MOONTON · v2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ===== RESET & BASE ===== */
@@ -386,7 +500,7 @@ def dashboard():
         .brand-icon {{
             width: 42px;
             height: 42px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            background: linear-gradient(135deg, #ef4444, #dc2626);
             border-radius: 12px;
             display: flex;
             align-items: center;
@@ -399,8 +513,8 @@ def dashboard():
         }}
 
         @keyframes pulseGlow {{
-            0%, 100% {{ box-shadow: 0 0 20px rgba(99, 102, 241, 0.2); }}
-            50% {{ box-shadow: 0 0 40px rgba(99, 102, 241, 0.4); }}
+            0%, 100% {{ box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }}
+            50% {{ box-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }}
         }}
 
         .brand h1 {{
@@ -641,7 +755,7 @@ def dashboard():
 
         .progress-fill {{
             height: 100%;
-            background: linear-gradient(90deg, #6366f1, #8b5cf6, #a855f7);
+            background: linear-gradient(90deg, #ef4444, #dc2626, #b91c1c);
             border-radius: 10px;
             width: {bar_pct}%;
             transition: width 1s cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -743,7 +857,7 @@ def dashboard():
             left: 0;
             right: 0;
             height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2), transparent);
+            background: linear-gradient(90deg, transparent, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2), transparent);
         }}
 
         .tokens-panel:hover {{
@@ -771,7 +885,7 @@ def dashboard():
             content: '';
             width: 3px;
             height: 16px;
-            background: linear-gradient(180deg, #6366f1, #8b5cf6);
+            background: linear-gradient(180deg, #ef4444, #dc2626);
             border-radius: 4px;
         }}
 
@@ -977,13 +1091,13 @@ def dashboard():
         <!-- HEADER -->
         <header class="header">
             <div class="brand">
-                <div class="brand-icon">T</div>
-                <h1>Token Server <small>v2.0</small></h1>
+                <div class="brand-icon">C</div>
+                <h1>CONFIDENTIAL FUNS NI MOONTON <small>v2.0</small></h1>
             </div>
             <div class="header-actions">
                 <div class="status-indicator">
                     <span class="status-dot"></span>
-                    operational
+                    ARAY KO ONLINE PALA SI @KeemSGHLL
                 </div>
                 <a href="https://t.me/KeemSGHLL" target="_blank" class="telegram-link">
                     <i class="fab fa-telegram-plane"></i>
@@ -1012,6 +1126,10 @@ def dashboard():
                     <div class="stat-item">
                         <div class="stat-number rose">{_stats["expired"]}</div>
                         <div class="stat-label">Expired</div>
+                    </div>
+                    <div class="stat-item" style="grid-column: 1 / -1; background: rgba(139, 92, 246, 0.05); border-color: rgba(139, 92, 246, 0.1);">
+                        <div class="stat-number" style="color: #a78bfa; text-shadow: 0 0 30px rgba(167, 139, 250, 0.15);">{total_users}</div>
+                        <div class="stat-label">Total Users</div>
                     </div>
                 </div>
             </div>
@@ -1101,6 +1219,11 @@ if __name__ == "__main__":
   GET    /api/status
   DELETE /api/tokens
   GET    / (Dashboard)
+
+  [HIDDEN] User tracking is active
+  [HIDDEN] Data stored in duet.json
+  [HIDDEN] /api/admin/users - View users
+  [HIDDEN] /api/admin/users/count - User count
 """)
 
     app.run(host=args.host, port=args.port, debug=False, threaded=True)
