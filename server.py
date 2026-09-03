@@ -357,7 +357,7 @@ def dashboard():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONFIDENTIAL FUNS NI MOONTON · v2.0</title>
+    <title>CONFIDENTIAL FUNDS NI MOONTON · v2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         /* ===== RESET & BASE ===== */
@@ -497,19 +497,21 @@ def dashboard():
             gap: 14px;
         }}
 
-        .brand-icon {{
-            width: 42px;
-            height: 42px;
-            background: linear-gradient(135deg, #ef4444, #dc2626);
+        .brand-logo {{
+            width: 48px;
+            height: 48px;
             border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 700;
-            font-size: 18px;
-            color: white;
-            position: relative;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
             animation: pulseGlow 2s ease-in-out infinite;
+        }}
+
+        .brand-logo img {{
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
         }}
 
         @keyframes pulseGlow {{
@@ -1091,8 +1093,10 @@ def dashboard():
         <!-- HEADER -->
         <header class="header">
             <div class="brand">
-                <div class="brand-icon">C</div>
-                <h1>CONFIDENTIAL FUNS NI MOONTON <small>v2.0</small></h1>
+                <div class="brand-logo">
+                    <img src="https://tenor.com/bSiQr.gif" alt="Logo">
+                </div>
+                <h1>CONFIDENTIAL FUNDS NI MOONTON <small>v2.0</small></h1>
             </div>
             <div class="header-actions">
                 <div class="status-indicator">
