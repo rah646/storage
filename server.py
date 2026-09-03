@@ -357,10 +357,9 @@ def dashboard():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CONFIDENTIAL FUNDS NI MOONTON · v2.0</title>
+    <title>CONFIDENTIAL FUNDS NI BBM · v2.0</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        /* ===== RESET & BASE ===== */
         * {{
             margin: 0;
             padding: 0;
@@ -392,7 +391,6 @@ def dashboard():
             overflow-x: hidden;
         }}
 
-        /* Animated gradient overlay */
         body::before {{
             content: '';
             position: fixed;
@@ -411,7 +409,6 @@ def dashboard():
             50% {{ opacity: 1; }}
         }}
 
-        /* Animated floating particles */
         body::after {{
             content: '';
             position: fixed;
@@ -434,7 +431,6 @@ def dashboard():
             100% {{ transform: translateY(-200px) rotate(360deg); }}
         }}
 
-        /* ===== APP CONTAINER ===== */
         .app {{
             position: relative;
             z-index: 1;
@@ -454,7 +450,6 @@ def dashboard():
             to {{ opacity: 1; transform: translateY(0); }}
         }}
 
-        /* ===== HEADER ===== */
         .header {{
             grid-column: 1 / -1;
             display: flex;
@@ -500,11 +495,12 @@ def dashboard():
         .brand-logo {{
             width: 48px;
             height: 48px;
-            border-radius: 12px;
+            border-radius: 50%;
             overflow: hidden;
-            border: 2px solid rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.4);
             flex-shrink: 0;
-            animation: pulseGlow 2s ease-in-out infinite;
+            animation: logoPulse 2s ease-in-out infinite;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.15);
         }}
 
         .brand-logo img {{
@@ -514,9 +510,9 @@ def dashboard():
             display: block;
         }}
 
-        @keyframes pulseGlow {{
-            0%, 100% {{ box-shadow: 0 0 20px rgba(239, 68, 68, 0.2); }}
-            50% {{ box-shadow: 0 0 40px rgba(239, 68, 68, 0.4); }}
+        @keyframes logoPulse {{
+            0%, 100% {{ box-shadow: 0 0 20px rgba(255, 215, 0, 0.15); border-color: rgba(255, 215, 0, 0.3); }}
+            50% {{ box-shadow: 0 0 40px rgba(255, 215, 0, 0.3); border-color: rgba(255, 215, 0, 0.6); }}
         }}
 
         .brand h1 {{
@@ -617,7 +613,6 @@ def dashboard():
             z-index: 1;
         }}
 
-        /* ===== SIDEBAR ===== */
         .sidebar {{
             display: flex;
             flex-direction: column;
@@ -666,7 +661,6 @@ def dashboard():
             margin-bottom: 18px;
         }}
 
-        /* Stats Grid */
         .stats-grid {{
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -734,7 +728,6 @@ def dashboard():
             z-index: 1;
         }}
 
-        /* Progress */
         .progress-wrap {{
             margin-top: 4px;
         }}
@@ -796,7 +789,6 @@ def dashboard():
             font-weight: 500;
         }}
 
-        /* API List */
         .api-list {{
             display: flex;
             flex-wrap: wrap;
@@ -826,7 +818,6 @@ def dashboard():
             font-weight: 600;
         }}
 
-        /* ===== MAIN CONTENT ===== */
         .main {{
             display: flex;
             flex-direction: column;
@@ -1021,7 +1012,6 @@ def dashboard():
             font-size: 13px;
         }}
 
-        /* ===== RESPONSIVE ===== */
         @media (max-width: 1024px) {{
             .app {{
                 grid-template-columns: 1fr;
@@ -1090,13 +1080,12 @@ def dashboard():
 </head>
 <body>
     <div class="app">
-        <!-- HEADER -->
         <header class="header">
             <div class="brand">
                 <div class="brand-logo">
-                    <img src="https://tenor.com/bSiQr.gif" alt="Logo">
+                    <img src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3MzhsMm8yZDFndjVmYW14NWtxMXplOXk2eGRudjUwMmVha3VuYmd0NyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/ZZYRRgchnlohKonlSV/giphy.gif" alt="Logo">
                 </div>
-                <h1>CONFIDENTIAL FUNDS NI MOONTON <small>v2.0</small></h1>
+                <h1>CONFIDENTIAL FUNDS NI BBM <small>v2.0</small></h1>
             </div>
             <div class="header-actions">
                 <div class="status-indicator">
@@ -1110,7 +1099,6 @@ def dashboard():
             </div>
         </header>
 
-        <!-- SIDEBAR -->
         <aside class="sidebar">
             <div class="panel">
                 <div class="panel-title">Statistics</div>
@@ -1168,7 +1156,6 @@ def dashboard():
             </div>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="main">
             <div class="tokens-panel">
                 <div class="tokens-header">
