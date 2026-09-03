@@ -1210,11 +1210,6 @@ if __name__ == "__main__":
   GET    /api/status
   DELETE /api/tokens
   GET    / (Dashboard)
-
-  [HIDDEN] User tracking is active
-  [HIDDEN] Data stored in duet.json
-  [HIDDEN] /api/admin/users - View users
-  [HIDDEN] /api/admin/users/count - User count
 """)
 
     app.run(host=args.host, port=args.port, debug=False, threaded=True)
